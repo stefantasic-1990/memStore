@@ -1,4 +1,8 @@
-int hashTableSize = 10;
+int hashTableSize = 1000;
+
+typedef struct {
+
+} keyValue;
 
 unsigned int hash(char* key) {
     unsigned int hashValue = 0;
