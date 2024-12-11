@@ -1,1 +1,1 @@
-# memStore
+# snapDB
