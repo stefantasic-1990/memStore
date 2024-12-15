@@ -49,7 +49,7 @@ int main() {
 
         while ((bytesRead = read(client_fd, buffer, sizeof(buffer))) > 0) {
             buffer[bytesRead] = '\0';
-            printf("Received command from client: %s\n", buffer);
+            printf("Received message from client: %s\n", buffer);
             write(client_fd, "Message received", 17);
         }
 

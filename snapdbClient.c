@@ -36,6 +36,11 @@ int main() {
         fgets(message, sizeof(message), stdin);
         message[strcspn(message, "\n")] = '\0';
 
+        if (strcmp(message, "exit") == 0) {
+            printf("Exiting client program.\n");
+            break;
+        }
+
         if (send(client_fd, message, strlen(message), 0) < 0) {
             perror("Send failed");
             break;
@@ -45,11 +50,6 @@ int main() {
         if (bytesRead > 0) {
             message[bytesRead] = '\0';
             printf("Server response: %s\n", message);
-        }
-
-        if (strcmp(message, "exit") == 0) {
-            printf("Exiting client program.\n");
-            break;
         }
     }
 
