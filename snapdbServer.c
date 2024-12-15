@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <string.h> 
 #include <arpa/inet.h>
 
 int main() {
@@ -18,17 +19,20 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
+    memset(&serverAddress, 0, sizeof(serverAddress));
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_addr.s_addr = INADDR_ANY;
     serverAddress.sin_port = htons(8080); 
 
     if (bind(server_fd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
         perror("Binding the socket failed");
+        close(server_fd);
         exit(EXIT_FAILURE);
     }
 
     if (listen(server_fd, 3) < 0) {
         perror("Unable to listen on socket. Closing");
+        close(server_fd);
         exit(EXIT_FAILURE);
     }
     
