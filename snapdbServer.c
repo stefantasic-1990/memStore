@@ -13,10 +13,6 @@ int main() {
     }
 
     int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof(opt))) {
-        perror("Setting soocket option 'REUSEPORT' failed");
-        exit(EXIT_FAILURE);
-    }
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
         perror("Setting soocket option 'REUSEADDR' failed");
         exit(EXIT_FAILURE);
