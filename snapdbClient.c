@@ -4,14 +4,11 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 
-#define SERVER_PORT 8080
-#define BUFFER_SIZE 1024
-
 int main() {
     int client_fd;
     struct sockaddr_in serverAddress;
-    char *server_ip = "127.0.0.1";
-    char message[BUFFER_SIZE];
+    char* server_ip = "127.0.0.1";
+    char message[1024];
 
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("Socket creation failed");
@@ -19,19 +16,20 @@ int main() {
     }
 
     serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(SERVER_PORT);
+    serverAddress.sin_port = htons(8080);
 
     if (inet_pton(AF_INET, server_ip, &serverAddress.sin_addr) <= 0) {
         perror("Invalid address or Address not supported");
+        close(client_fd);
         exit(EXIT_FAILURE);
     }
 
     if (connect(client_fd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
         perror("Connection failed");
+        close(client_fd);
         exit(EXIT_FAILURE);
     }
-
-    printf("Connected to the server at %s:%d\n", server_ip, SERVER_PORT);
+    printf("Connected to the server at %s:%d\n", server_ip, 8080);
 
     while (1) {
         printf("Enter message to send to server: ");
