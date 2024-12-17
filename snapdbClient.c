@@ -3,12 +3,12 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include "craftLine.h"
 
-int main() {
+int main(int argc, char** argv) {
     int client_fd;
     struct sockaddr_in serverAddress;
     char* server_ip = "127.0.0.1";
-    char message[1024];
 
     if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("Socket creation failed");
@@ -31,9 +31,8 @@ int main() {
     printf("Connected to the server at %s:%d\n", server_ip, 8080);
 
     while (1) {
-        printf("Enter message to send to server: ");
-        fgets(message, sizeof(message), stdin);
-        message[strcspn(message, "\n")] = '\0';
+        char* message;
+        message = craftLine("snapClient => ");
 
         if (strcmp(message, "exit") == 0) {
             printf("Exiting client program.\n");
@@ -45,7 +44,9 @@ int main() {
             break;
         }
 
-        int bytesRead = read(client_fd, message, sizeof(message));
+        int bytesRead;
+        bytesRead = read(client_fd, message, sizeof(message));
+
         if (bytesRead > 0) {
             message[bytesRead] = '\0';
             printf("Server response: %s\n", message);
