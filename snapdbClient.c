@@ -17,7 +17,6 @@ int main() {
 
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(8080);
-
     if (inet_pton(AF_INET, server_ip, &serverAddress.sin_addr) <= 0) {
         perror("Invalid address or Address not supported");
         close(client_fd);
