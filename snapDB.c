@@ -1,14 +1,22 @@
 #include "snapDB.h"
 #include <stdio.h>
 
-unsigned long hash(const char *str) {
+#define HASH_TABLE_SIZE 1337;
+
+unsigned long hashIndex(const char* key) {
     unsigned long hash = 5381;
     int c;
-    while ((c = *str++)) {
+    while ((c = *key++)) {
         hash = ((hash << 5) + hash) + c;
     }
+    int hashIndex = hash % HASH_TABLE_SIZE;
+    
+    return hashIndex;
+}
 
-    return hash;
+unsigned long hash_index(const char *str, unsigned long table_size) {
+    unsigned long hash = hash_djb2(str);
+    return hash % table_size;  // Use modulo to ensure the index is within table bounds
 }
 
 int initializeDatabase() {
