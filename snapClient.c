@@ -44,8 +44,12 @@ int main(int argc, char** argv) {
             break;
         }
 
-        int bytesRead;
-        bytesRead = read(client_fd, message, sizeof(message));
+        char c;
+        int i = 0;
+        while (read(client_fd, message, sizeof(char)) != '\0') {
+            message[i++] = c;
+            message[i] = '\0';
+        }
 
         if (bytesRead > 0) {
             message[bytesRead] = '\0';
