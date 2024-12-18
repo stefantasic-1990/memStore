@@ -5,6 +5,28 @@
 #include <arpa/inet.h>
 #include "craftLine.h"
 
+char* readSocket(int socket_fd) {
+    int bufferSize = 50;
+    char* inputBuffer = malloc(bufferSize);
+
+    char c;
+    int i = 0;
+    while (1) {
+        read(socket_fd, &c, 1);
+        if (c == '\0') {
+            inputBuffer[i] = c;
+            return inputBuffer;
+        } else {
+            inputBuffer[i++] = c;
+        }
+
+        if (i >= bufferSize) {
+            bufferSize += 50;
+            inputBuffer = realloc(inputBuffer, bufferSize);
+        }
+    }
+}
+
 int main(int argc, char** argv) {
     int client_fd;
     struct sockaddr_in serverAddress;
@@ -31,30 +53,22 @@ int main(int argc, char** argv) {
     printf("Connected to the server at %s:%d\n", server_ip, 8080);
 
     while (1) {
-        char* message;
-        message = craftLine("snapClient => ");
-
-        if (strcmp(message, "exit") == 0) {
+        char* messageBuffer;
+        messageBuffer = craftLine("snapClient => ");
+        
+        if (strcmp(messageBuffer, "exit") == 0) {
             printf("Exiting client program.\n");
             break;
         }
 
-        if (send(client_fd, message, strlen(message), 0) < 0) {
+        if (send(client_fd, messageBuffer, strlen(messageBuffer), 0) < 0) {
             perror("Send failed");
             break;
         }
 
-        char c;
-        int i = 0;
-        while (read(client_fd, message, sizeof(char)) != '\0') {
-            message[i++] = c;
-            message[i] = '\0';
-        }
-
-        if (bytesRead > 0) {
-            message[bytesRead] = '\0';
-            printf("Server response: %s\n", message);
-        }
+        messageBuffer = readSocket(client_fd);
+        
+        printf("Server response: %s\n", messageBuffer);
     }
 
     close(client_fd);
