@@ -5,7 +5,19 @@
 #include <arpa/inet.h>
 #include "craftLine.h"
 
-char* readSocket(int socket_fd) {
+void sendMessage(int socket_fd, char* message) {
+    if (strcmp(message, "exit") == 0) {
+        printf("Exiting client program.\n");
+        close(socket_fd);
+        exit(EXIT_SUCCESS);
+    } else if (send(socket_fd, message, strlen(message), 0) < 0) {;
+        close(socket_fd);
+        perror("Send failed");
+        exit(EXIT_FAILURE);
+    }
+}
+
+char* readMessage(int socket_fd) {
     int bufferSize = 50;
     char* inputBuffer = malloc(bufferSize);
 
@@ -15,62 +27,61 @@ char* readSocket(int socket_fd) {
         read(socket_fd, &c, 1);
         if (c == '\0') {
             inputBuffer[i] = c;
-            return inputBuffer;
+            break;
         } else {
             inputBuffer[i++] = c;
         }
 
         if (i >= bufferSize) {
-            bufferSize += 50;
+            bufferSize += 25;
             inputBuffer = realloc(inputBuffer, bufferSize);
         }
     }
+
+    return inputBuffer;
 }
 
-int main(int argc, char** argv) {
-    int client_fd;
+int connectServer(char* serverIpAddress) {
+    int socket_fd;
     struct sockaddr_in serverAddress;
-    char* server_ip = "127.0.0.1";
 
-    if ((client_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+    if ((socket_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
 
     serverAddress.sin_family = AF_INET;
     serverAddress.sin_port = htons(8080);
-    if (inet_pton(AF_INET, server_ip, &serverAddress.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, serverIpAddress, &serverAddress.sin_addr) <= 0) {
         perror("Invalid address or Address not supported");
-        close(client_fd);
+        close(socket_fd);
         exit(EXIT_FAILURE);
     }
 
-    if (connect(client_fd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
+    if (connect(socket_fd, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
         perror("Connection failed");
-        close(client_fd);
+        close(socket_fd);
         exit(EXIT_FAILURE);
     }
-    printf("Connected to the server at %s:%d\n", server_ip, 8080);
+
+    printf("Connected to the server at %s:%d\n", serverIpAddress, 8080);
+    return socket_fd;
+}
+
+int main(int argc, char** argv) {
+    int client_fd;
+    if (argc != 2) {
+        perror("Incorrect number of arguments");
+        exit(EXIT_FAILURE);
+    } else {
+        client_fd = connectServer(argv[1]);
+    }
 
     while (1) {
         char* messageBuffer;
         messageBuffer = craftLine("snapClient => ");
-        
-        if (strcmp(messageBuffer, "exit") == 0) {
-            printf("Exiting client program.\n");
-            break;
-        }
-
-        if (send(client_fd, messageBuffer, strlen(messageBuffer), 0) < 0) {
-            perror("Send failed");
-            break;
-        }
-
-        messageBuffer = readSocket(client_fd);
-        
+        sendMessage(client_fd, messageBuffer);
+        messageBuffer = readMessage(client_fd);
         printf("Server response: %s\n", messageBuffer);
     }
-
-    close(client_fd);
-    return 0;
 }
