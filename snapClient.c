@@ -6,11 +6,12 @@
 #include "craftLine.h"
 
 void sendMessage(int socket_fd, char* message) {
+    int messageSize = strlen(message)+1;
     if (strcmp(message, "exit") == 0) {
         printf("Exiting client program.\n");
         close(socket_fd);
         exit(EXIT_SUCCESS);
-    } else if (send(socket_fd, message, strlen(message), 0) < 0) {;
+    } else if (send(socket_fd, message, messageSize, 0) < 0) {;
         close(socket_fd);
         perror("Send failed");
         exit(EXIT_FAILURE);
@@ -18,13 +19,23 @@ void sendMessage(int socket_fd, char* message) {
 }
 
 char* readMessage(int socket_fd) {
-    int bufferSize = 50;
+    int bufferSize = 150;
     char* inputBuffer = malloc(bufferSize);
 
     char c;
     int i = 0;
     while (1) {
-        read(socket_fd, &c, 1);
+        int bytesRead = read(socket_fd, &c, 1);
+        if (bytesRead == 0) {
+            printf("Server disconnected gracefully\n");
+            inputBuffer = NULL;
+            break;
+        } else if (bytesRead == -1) {
+            perror("Read error. Disconnecting the client");
+            inputBuffer = NULL;
+            break;
+        }
+
         if (c == '\0') {
             inputBuffer[i] = c;
             break;
@@ -33,7 +44,7 @@ char* readMessage(int socket_fd) {
         }
 
         if (i >= bufferSize) {
-            bufferSize += 25;
+            bufferSize += 50;
             inputBuffer = realloc(inputBuffer, bufferSize);
         }
     }
@@ -82,6 +93,12 @@ int main(int argc, char** argv) {
         messageBuffer = craftLine("snapClient => ");
         sendMessage(client_fd, messageBuffer);
         messageBuffer = readMessage(client_fd);
-        printf("Server response: %s\n", messageBuffer);
+        if (messageBuffer == NULL) {
+            close(client_fd);
+            break;
+        } else {
+            printf("Server response: %s\n", messageBuffer);
+        }
     }
+    printf("Exiting snapDB client\n");
 }
