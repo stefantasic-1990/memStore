@@ -7,7 +7,7 @@ typedef struct {
 } KeyValue;
 
 int initializeDatabase();
-int put();
+int put(char* key, char* value);
 int remove();
 char* get();
 
