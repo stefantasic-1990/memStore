@@ -1,4 +1,5 @@
 #include "snapDB.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -58,13 +59,47 @@ int remove(const char* key) {
 
     while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
-            
+            if (prev == NULL && curr->next == NULL) {
+                curr->key = NULL;
+                curr->value = NULL;
+                return 0;
+            } else if (prev == NULL && curr->next != NULL) {
+                hashTable[index] = *(curr->next);
+                free(curr->key);
+                free(curr->value);
+                free(curr);
+                return 0;
+            } else if (prev != NULL && curr->next != NULL) {
+                prev->next = curr->next;
+                free(curr->key);
+                free(curr->value);
+                free(curr);
+                return 0;
+            } else {
+                prev->next = NULL;
+                free(curr->key);
+                free(curr->value);
+                free(curr);
+                return 0;
+            }
         }
         prev = curr;
         curr = curr->next;
     }
+
+    return 0;
 }
 
-char* get() {
-    
+char* get(const char* key) {
+    int index = hashIndex(key);
+    KeyValue* curr = &hashTable[index];
+
+    while (curr->key != NULL) {
+        if (strcmp(curr->key, key) == 0) {
+            return curr->value;
+        }
+        curr = curr->next;
+    }
+
+    return NULL;
 }
