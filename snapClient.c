@@ -5,7 +5,7 @@
 #include <arpa/inet.h>
 #include "craftLine.h"
 
-void sendMessage(int socket_fd, char* message) {
+void writeMessage(int socket_fd, char* message) {
     int messageSize = strlen(message)+1;
     if (strcmp(message, "exit") == 0) {
         printf("Exiting client program.\n");
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
     while (1) {
         char* messageBuffer;
         messageBuffer = craftLine("snapClient => ");
-        sendMessage(client_fd, messageBuffer);
+        writeMessage(client_fd, messageBuffer);
         messageBuffer = readMessage(client_fd);
         if (messageBuffer == NULL) {
             close(client_fd);
