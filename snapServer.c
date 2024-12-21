@@ -5,6 +5,19 @@
 #include <arpa/inet.h>
 #include "snapDB.h"
 
+/*
+put key:value
+get key
+remove key
+*/
+
+char* parseCommand(char* command) {
+    char* commandName;
+    char* commandArg;
+
+    
+}
+
 char* readMessage(int socket_fd) {
     int bufferSize = 150;
     char* inputBuffer = malloc(bufferSize);
@@ -101,10 +114,8 @@ int main() {
                 close(client_fd);
                 break;
             } else {
-                
-
-                printf("Received message from client: %s\n", messageBuffer);
-                write(client_fd, "Message received", 17); 
+                messageBuffer = parseCommand(messageBuffer);
+                write(client_fd, messageBuffer, strlen(messageBuffer)); 
             }
         } while(1);
     } while (1);
