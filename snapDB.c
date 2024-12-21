@@ -20,6 +20,7 @@ unsigned long hashIndex(const char* key) {
 
 int initializeDatabase() {
     printf("Initializing database...\n");
+    // initialize hashTable structure
     // load persisted data from file into memory
     printf("Database sucessfully initialized.\n");
     return 0;
@@ -29,36 +30,39 @@ int put(const char* key, const char* value) {
     int index = hashIndex(key);
     KeyValue* curr = &hashTable[index];
 
-    if (curr->key == NULL) {
-        curr->key = strdup(key);
-        curr->value = strdup(value);
-        curr->next = NULL;
-    } else {
-        while (curr->next != NULL) {
-            if (strcmp(curr->key, key) == 0) {
-                free(curr->value);
-                curr->value = strdup(value);
-                return 0;
-            }
-            curr = curr->next;
-        }
+    while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
             free(curr->value);
             curr->value = strdup(value);
             return 0;
-        } else {
-            curr->next = malloc(sizeof(KeyValue));
-            curr = curr->next;
-            curr->key = strdup(key);
-            curr->value = strdup(value);
-            curr->next = NULL;
-            return 0;
         }
+        curr = curr->next;
     }
+    curr->key = strdup(key);
+    curr->value = strdup(value);
+    curr->next = malloc(sizeof(KeyValue));
+
+    // initialize next empty slot
+    curr = curr->next;
+    curr->key = NULL;
+    curr->value = NULL;
+    curr->next = NULL;
+    
+    return 0;
 }
 
-int remove() {
+int remove(const char* key) {
+    int index = hashIndex(key);
+    KeyValue* curr = &hashTable[index];
+    KeyValue* prev = NULL;
 
+    while (curr->key != NULL) {
+        if (strcmp(curr->key, key) == 0) {
+            
+        }
+        prev = curr;
+        curr = curr->next;
+    }
 }
 
 char* get() {
