@@ -4,6 +4,7 @@
 typedef struct {
     char* key;
     char* value;
+    struct KeyValue* next;
 } KeyValue;
 
 int initializeDatabase();
