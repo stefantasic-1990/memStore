@@ -37,9 +37,11 @@ char* readMessage(int socket_fd) {
         }
 
         if (c == '\0') {
+            printf("reading in null\n");
             inputBuffer[i] = c;
             break;
         } else {
+            printf("reading in\n");
             inputBuffer[i++] = c;
         }
 

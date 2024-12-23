@@ -11,8 +11,13 @@ char* parseCommand(char* command) {
     char* result;
     char* delimiter = " ";
 
+    printf("%s\n", command);
+
     commandName = strtok(command, delimiter);
     commandArg = strtok(NULL, delimiter);
+
+    printf("Enter\n");
+    printf("%s\n", command);
 
     if (strcmp(commandName, "get") == 0) {
         result = get(commandArg);
@@ -33,7 +38,9 @@ char* parseCommand(char* command) {
         delimiter = ":";
         commandArg1 = strtok(commandArg, delimiter);
         commandArg2 = strtok(NULL, delimiter);
+        printf("Command: %s, arg1 %s, arg2 %s\n", commandName, commandArg1, commandArg2);
         if (put(commandArg1, commandArg2) == 0) {
+            printf("Suceeded\n");
             return "Success";
         } else {
             return "Failure";
@@ -140,7 +147,12 @@ int main() {
                 break;
             } else {
                 messageBuffer = parseCommand(messageBuffer);
-                write(client_fd, messageBuffer, strlen(messageBuffer)); 
+                if (messageBuffer != NULL) {
+                    printf("Writing\n");
+                    write(client_fd, messageBuffer, strlen(messageBuffer)+1);
+                } else {
+                    write(client_fd, "error, invalid command", sizeof("error, invalid command"));
+                }
             }
         } while(1);
     } while (1);
