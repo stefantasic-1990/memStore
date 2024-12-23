@@ -5,17 +5,27 @@
 #include <arpa/inet.h>
 #include "snapDB.h"
 
-/*
-put key:value
-get key
-remove key
-*/
-
 char* parseCommand(char* command) {
     char* commandName;
     char* commandArg;
+    char* result;
+    char* delimiter = ' ';
 
-    
+    commandName = strtok(command, delimiter);
+    commandArg = strtok(NULL, delimiter);
+
+    if (commandName == 'get') {
+        result = get(commandArg);
+        return result;
+    } else if (commandName == 'remove') {
+        result = remove(commandArg);
+        return result;
+    } else if (commandName == 'put') {
+        result = put(commandArg);
+        return result;
+    } else {
+        return NULL;
+    }
 }
 
 char* readMessage(int socket_fd) {
