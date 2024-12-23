@@ -5,7 +5,7 @@
 
 #define HASH_TABLE_SIZE 1337
 
-static KeyValue hashTable[HASH_TABLE_SIZE];
+static KeyValue* hashTable[HASH_TABLE_SIZE] = {NULL};
 
 unsigned long hashIndex(const char* key) {
     int c;
@@ -21,7 +21,12 @@ unsigned long hashIndex(const char* key) {
 
 int initializeDatabase() {
     printf("Initializing database...\n");
-    // initialize hashTable structure
+    for (int i = 0; i < HASH_TABLE_SIZE; i++) {
+        KeyValue* curr = hashTable[i];
+        curr->key = NULL;
+        curr->value = NULL;
+        curr->next = NULL;
+    }
     // load persisted data from file into memory
     printf("Database sucessfully initialized.\n");
     return 0;
