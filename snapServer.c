@@ -9,20 +9,35 @@ char* parseCommand(char* command) {
     char* commandName;
     char* commandArg;
     char* result;
-    char* delimiter = ' ';
+    char* delimiter = " ";
 
     commandName = strtok(command, delimiter);
     commandArg = strtok(NULL, delimiter);
 
-    if (commandName == 'get') {
+    if (strcmp(commandName, "get") == 0) {
         result = get(commandArg);
-        return result;
-    } else if (commandName == 'remove') {
-        result = remove(commandArg);
-        return result;
-    } else if (commandName == 'put') {
-        result = put(commandArg);
-        return result;
+        if (result != NULL) {
+            return result;
+        } else {
+            return "Failure";
+        }
+    } else if (strcmp(commandName, "remove") == 0) {
+        if (remove(commandArg) == 0) {
+            return "Success";
+        } else {
+            return "Failure";
+        }
+    } else if (strcmp(commandName, "put") == 0) {
+        char* commandArg1;
+        char* commandArg2;
+        delimiter = ":";
+        commandArg1 = strtok(commandArg, delimiter);
+        commandArg2 = strtok(NULL, delimiter);
+        if (put(commandArg1, commandArg2) == 0) {
+            return "Success";
+        } else {
+            return "Failure";
+        }
     } else {
         return NULL;
     }
