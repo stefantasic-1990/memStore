@@ -35,39 +35,47 @@ int initializeDatabase() {
     return 0;
 }
 
-int put(const char* key, const char* value) {
-    printf("Key %s Value %s\n", key, value);
-    int index = getHashIndex(key);
-    KeyValue* curr = hashTable[index];
-    printf("Struct at %i key is %s and val is %s \n", index, curr->key, curr->value);
-
+char* get(const char* key) {
+    KeyValue* curr = hashTable[getHashIndex(key)];
     while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
-            printf("Am I here? Why? Key is %s and val is %s \n", curr->key, key);
+            return curr->value;
+        }
+        curr = curr->next;
+    }
+
+    return NULL;
+}
+
+int put(const char* key, const char* value) {
+    KeyValue* curr = hashTable[getHashIndex(key)];
+    while (curr->key != NULL) {
+        if (strcmp(curr->key, key) == 0) {
             free(curr->value);
             curr->value = strdup(value);
             return 0;
         }
         curr = curr->next;
     }
+    KeyValue* next = malloc(sizeof(KeyValue));
     curr->key = strdup(key);
     curr->value = strdup(value);
-    printf("Key now is %s Value now is %s\n", curr->key, curr->value);
-    KeyValue next = {NULL, NULL, NULL};
-    curr->next = &next;
+    curr->next = next;
+    next->key = NULL;
+    next->value = NULL;
+    next->next = NULL;
     
     return 0;
 }
 
 int remove(const char* key) {
-    int index = getHashIndex(key);
-    KeyValue* curr = hashTable[index];
+    KeyValue* curr = hashTable[getHashIndex(key)];
     KeyValue* prev = NULL;
 
     while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
             if (prev == NULL && curr->next != NULL) {
-                hashTable[index] = curr->next;
+                hashTable[getHashIndex(key)] = curr->next;
                 free(curr->key);
                 free(curr->value);
                 free(curr);
@@ -91,19 +99,4 @@ int remove(const char* key) {
     }
 
     return 0;
-}
-
-char* get(const char* key) {
-    int index = getHashIndex(key);
-    KeyValue* curr = hashTable[index];
-
-    while (curr->key != NULL) {
-        if (strcmp(curr->key, key) == 0) {
-            printf("VALUE IS: %s\n", curr->value);
-            return curr->value;
-        }
-        curr = curr->next;
-    }
-
-    return NULL;
 }
