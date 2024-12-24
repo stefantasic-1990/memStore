@@ -22,10 +22,9 @@ unsigned long hashIndex(const char* key) {
 int initializeDatabase() {
     printf("Initializing database...\n");
     for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeyValue* curr = hashTable[i];
-        curr->key = NULL;
-        curr->value = NULL;
-        curr->next = NULL;
+        KeyValue curr = {NULL, NULL, NULL};
+        hashTable[i] = &curr;
+        printf("Struct at %i key is %s and val is %s \n", i, curr.key, curr.value);
     }
     // load persisted data from file into memory
     printf("Database sucessfully initialized.\n");
@@ -33,11 +32,14 @@ int initializeDatabase() {
 }
 
 int put(const char* key, const char* value) {
+    printf("Key %s Value %s\n", key, value);
     int index = hashIndex(key);
-    KeyValue* curr = &hashTable[index];
+    KeyValue* curr = hashTable[index];
+    printf("Struct at %i key is %s and val is %s \n", index, curr->key, curr->value);
 
     while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
+            printf("Am I here? Why? Key is %s and val is %s \n", curr->key, key);
             free(curr->value);
             curr->value = strdup(value);
             return 0;
@@ -46,30 +48,22 @@ int put(const char* key, const char* value) {
     }
     curr->key = strdup(key);
     curr->value = strdup(value);
-    curr->next = malloc(sizeof(KeyValue));
-
-    // initialize next empty slot
-    curr = curr->next;
-    curr->key = NULL;
-    curr->value = NULL;
-    curr->next = NULL;
+    printf("Key now is %s Value now is %s\n", curr->key, curr->value);
+    KeyValue next = {NULL, NULL, NULL};
+    curr->next = &next;
     
     return 0;
 }
 
 int remove(const char* key) {
     int index = hashIndex(key);
-    KeyValue* curr = &hashTable[index];
+    KeyValue* curr = hashTable[index];
     KeyValue* prev = NULL;
 
     while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
-            if (prev == NULL && curr->next == NULL) {
-                curr->key = NULL;
-                curr->value = NULL;
-                return 0;
-            } else if (prev == NULL && curr->next != NULL) {
-                hashTable[index] = *(curr->next);
+            if (prev == NULL && curr->next != NULL) {
+                hashTable[index] = curr->next;
                 free(curr->key);
                 free(curr->value);
                 free(curr);
@@ -97,10 +91,11 @@ int remove(const char* key) {
 
 char* get(const char* key) {
     int index = hashIndex(key);
-    KeyValue* curr = &hashTable[index];
+    KeyValue* curr = hashTable[index];
 
     while (curr->key != NULL) {
         if (strcmp(curr->key, key) == 0) {
+            printf("VALUE IS: %s\n", curr->value);
             return curr->value;
         }
         curr = curr->next;
