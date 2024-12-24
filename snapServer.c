@@ -11,39 +11,29 @@ char* parseCommand(char* command) {
     char* result;
     char* delimiter = " ";
 
-    printf("%s\n", command);
-
     commandName = strtok(command, delimiter);
     commandArg = strtok(NULL, delimiter);
-
-    printf("Enter\n");
-    printf("%s\n", command);
 
     if (strcmp(commandName, "get") == 0) {
         result = get(commandArg);
         if (result != NULL) {
             return result;
         } else {
-            return "Failure";
+            return "Key does not exist.";
         }
     } else if (strcmp(commandName, "remove") == 0) {
         if (remove(commandArg) == 0) {
             return "Success";
         } else {
-            return "Failure";
+            return "Key does not exist";
         }
     } else if (strcmp(commandName, "put") == 0) {
-        char* commandArg1;
-        char* commandArg2;
-        delimiter = ":";
-        commandArg1 = strtok(commandArg, delimiter);
-        commandArg2 = strtok(NULL, delimiter);
-        printf("Command: %s, arg1 %s, arg2 %s\n", commandName, commandArg1, commandArg2);
+        char* commandArg1 = strtok(commandArg, ":");
+        char* commandArg2 = strtok(NULL, ":");
         if (put(commandArg1, commandArg2) == 0) {
-            printf("Suceeded\n");
             return "Success";
         } else {
-            return "Failure";
+            return "Unable to store key";
         }
     } else {
         return NULL;
@@ -53,9 +43,8 @@ char* parseCommand(char* command) {
 char* readMessage(int socket_fd) {
     int bufferSize = 150;
     char* inputBuffer = malloc(bufferSize);
-
-    char c;
     int i = 0;
+    char c;
     while (1) {
         int bytesRead = read(socket_fd, &c, 1);
         if (bytesRead == 0) {
@@ -63,7 +52,7 @@ char* readMessage(int socket_fd) {
             inputBuffer = NULL;
             break;
         } else if (bytesRead == -1) {
-            perror("Read error. Disconnecting the client");
+            perror("Read error, disconnecting client");
             inputBuffer = NULL;
             break;
         }
@@ -148,7 +137,6 @@ int main() {
             } else {
                 messageBuffer = parseCommand(messageBuffer);
                 if (messageBuffer != NULL) {
-                    printf("Writing\n");
                     write(client_fd, messageBuffer, strlen(messageBuffer)+1);
                 } else {
                     write(client_fd, "error, invalid command", sizeof("error, invalid command"));
