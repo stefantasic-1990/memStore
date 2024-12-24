@@ -7,33 +7,37 @@
 
 static KeyValue* hashTable[HASH_TABLE_SIZE] = {NULL};
 
-unsigned long hashIndex(const char* key) {
+unsigned long getHashIndex(const char* key) {
     int c;
     unsigned long hash = 5381;
 
     while ((c = *key++)) {
         hash = ((hash << 5) + hash) + c;
     }
-    int hashIndex = hash % HASH_TABLE_SIZE;
+    int getHashIndex = hash % HASH_TABLE_SIZE;
 
-    return hashIndex;
+    return getHashIndex;
 }
 
 int initializeDatabase() {
     printf("Initializing database...\n");
     for (int i = 0; i < HASH_TABLE_SIZE; i++) {
-        KeyValue curr = {NULL, NULL, NULL};
-        hashTable[i] = &curr;
-        printf("Struct at %i key is %s and val is %s \n", i, curr.key, curr.value);
+        KeyValue* curr = malloc(sizeof(KeyValue));
+        if (curr == NULL) {
+            perror("Failed to allocate memory");
+        }
+        curr->key = NULL;
+        curr->value = NULL;
+        curr->next = NULL;
+        hashTable[i] = curr;
     }
-    // load persisted data from file into memory
-    printf("Database sucessfully initialized.\n");
+    printf("Database initialized\n");
     return 0;
 }
 
 int put(const char* key, const char* value) {
     printf("Key %s Value %s\n", key, value);
-    int index = hashIndex(key);
+    int index = getHashIndex(key);
     KeyValue* curr = hashTable[index];
     printf("Struct at %i key is %s and val is %s \n", index, curr->key, curr->value);
 
@@ -56,7 +60,7 @@ int put(const char* key, const char* value) {
 }
 
 int remove(const char* key) {
-    int index = hashIndex(key);
+    int index = getHashIndex(key);
     KeyValue* curr = hashTable[index];
     KeyValue* prev = NULL;
 
@@ -90,7 +94,7 @@ int remove(const char* key) {
 }
 
 char* get(const char* key) {
-    int index = hashIndex(key);
+    int index = getHashIndex(key);
     KeyValue* curr = hashTable[index];
 
     while (curr->key != NULL) {
