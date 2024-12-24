@@ -9,10 +9,17 @@ char* parseCommand(char* command) {
     char* commandName;
     char* commandArg;
     char* result;
-    char* delimiter = " ";
 
-    commandName = strtok(command, delimiter);
-    commandArg = strtok(NULL, delimiter);
+    char *spacePos = strchr(command, ' ');
+    if (spacePos == NULL) {
+        return "Command must be composed of a method and argument";
+    } else {
+        int separator = spacePos - command;
+        commandName = malloc(separator + 1);
+        strncpy(commandName, command, separator);
+        commandName[separator] = '\0';
+        commandArg = strdup(spacePos + 1);
+    }
 
     if (strcmp(commandName, "get") == 0) {
         result = get(commandArg);
